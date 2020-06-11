@@ -60,3 +60,9 @@ class CtfManager:
         res = self.ctfd_api.submit_flag(challenge_id, flag)
         if res != "correct":
             raise Exception(res)
+
+    def get_file_links(self, challenge_id):
+        return [
+            f"{self.url}{f}"
+            for f in self.ctfd_api.get_challenge_details(challenge_id)["files"]
+        ]

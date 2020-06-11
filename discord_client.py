@@ -45,6 +45,10 @@ class CtfdDiscordClient(discord.Client):
                 flag = msg.split(" ", 1)[-1]
                 await self.submit_flag(flag, message.channel)
                 await message.channel.send("Wow, flag is correct!")
+            if msg == "$files":
+                chall_id = self.channel_id_to_chall_id[message.channel.id]
+                for f in self.ctf_manager.get_file_links(chall_id):
+                    await message.channel.send(f"{f}")
             if msg == "$teardown":
                 await message.channel.send("Tearing down...")
                 await self.teardown()
@@ -57,8 +61,11 @@ $set username <username>
 $set password <password>
 $set url <url>
 $fetch
-$submit flag <flag>
 $teardown
+
+Inside channels:
+$submit flag <flag>
+$files
                 """
                 )
         except Exception as err:
@@ -75,13 +82,16 @@ $teardown
         self.discord_categories_map = {}
 
     async def setup_channels(self, challs, guild):
-        if SOLVED_CHANNEL not in self.discord_categories_map.keys():
-            server_category = await guild.create_category(SOLVED_CHANNEL)
         self.populate_categories_map(guild)
         self.populate_channels(challs, guild)
+        if SOLVED_CHANNEL not in self.discord_categories_map.keys():
+            server_category = await guild.create_category(SOLVED_CHANNEL)
+            self.discord_categories_map[server_category.name] = server_category
 
         for chall_id, chall in challs.items():
-            chall_category = sanitise(SOLVED_CHANNEL if chall.solved else chall.category)
+            chall_category = sanitise(
+                SOLVED_CHANNEL if chall.solved else chall.category
+            )
 
             server_category = self.discord_categories_map.get(chall_category)
             if server_category is None:
