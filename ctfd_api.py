@@ -45,4 +45,15 @@ class CtfdApi:
             return res["data"]
 
     def submit_flag(self, challenge_id, flag):
-        return self.session.post(f"{self.base_url}/api/v1/challenges/attempt", json={"challenge_id": challenge_id, "submission": flag}).json()['status']
+        get_req = self.session.get(f"{self.base_url}/challenges")
+        nonce_search = CSRF_NONCE_REGEX_1.search(
+            get_req.text
+        ) or CSRF_NONCE_REGEX_2.search(get_req.text)
+        nonce = nonce_search.group(1)
+
+        res = self.session.post(
+            f"{self.base_url}/api/v1/challenges/attempt",
+            json={"challenge_id": challenge_id, "submission": flag},
+            headers={"CSRF-Token": nonce},
+        ).json()
+        return res["data"]["status"]
