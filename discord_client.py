@@ -6,6 +6,7 @@ class CtfdDiscordClient(discord.Client):
     def __init__(self):
         super().__init__()
         self.ctf_manager = CtfManager()
+        self.channels = {}
 
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
@@ -13,11 +14,14 @@ class CtfdDiscordClient(discord.Client):
     async def on_message(self, message):
         msg = message.content
 
-        if msg.startswith("$set username"):
+        if msg.startswith("$set username "):
             self.ctf_manager.username = msg.split(" ", 2)[-1]
-        if msg.startswith("$set password"):
+        if msg.startswith("$set password "):
             self.ctf_manager.password = msg.split(" ", 2)[-1]
-        if msg.startswith("$set url"):
+        if msg.startswith("$set url "):
             self.ctf_manager.url = msg.split(" ", 2)[-1]
-        if msg.startswith("$start"):
-            self.ctf_manager.start()
+        if msg == "$fetch":
+            self.ctf_manager.fetch()
+        if msg.startswith("$submit "):
+            flag = msg.split(" ", 1)[-1]
+            print(dir(message), message, flag)
