@@ -1,5 +1,6 @@
 import requests
 import re
+from json.decoder import JSONDecodeError
 
 CSRF_NONCE_REGEX_1 = re.compile("'csrfNonce': \"(.*)\"")
 CSRF_NONCE_REGEX_2 = re.compile('name="nonce" value="(.*)"')
@@ -26,7 +27,11 @@ class CtfdApi:
             raise Exception("Login failed")
 
     def get_challenges(self):
-        res = self.session.get(f"{self.base_url}/api/v1/challenges").json()
+        api_res = self.session.get(f"{self.base_url}/api/v1/challenges")
+        try:
+            res = api_res.json()
+        except JSONDecodeError as err:
+            raise Exception(api_res.text)
         if res.get("success"):
             return res["data"]
 

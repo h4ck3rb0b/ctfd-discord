@@ -1,6 +1,7 @@
 from ctf_manager import CtfManager
 import discord
 import re
+import traceback
 
 SANITISE_REGEX = re.compile("[^a-zA-Z0-9-]")
 SOLVED_CHANNEL = "solved"
@@ -69,8 +70,7 @@ $files
                 """
                 )
         except Exception as err:
-            await message.channel.send(f"Exception: {err}")
-            raise err
+            await message.channel.send(f"Exception: {traceback.format_exc()}"[:2000])
 
     async def teardown(self):
         for channel in self.chall_id_to_channel.values():
